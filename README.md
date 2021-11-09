@@ -107,7 +107,7 @@ Arguments
 - **custom_pdf_fun (Callable)**: custom function to parse pdf files.
   It must accept a pdfplumber page as argument and return a text to be joined with previous pages.
 
-Current languages support for the default parser
+Current language support for the default parser
 ------------------------------------------------
 English, Spanish, German, French 
 

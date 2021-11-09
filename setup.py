@@ -3,7 +3,7 @@
 from distutils.core import setup
 import os
 import re
-
+from pathlib import Path
 
 lib = os.path.dirname(os.path.realpath("./prettyparser"))
 reqpath = os.path.join(lib, 'requirements.txt')
@@ -22,12 +22,12 @@ try:
     else:
         long_description = ''
 except:
-    pass
+    long_description = Path(long_desc_path).read_text()
 
 
 
 setup(name='prettyparser',
-      version='1.0.4',
+      version='1.0.5',
       description='Library for Parsing PDF/TXT and Python Objects with Text Using Regular Expressions',
       author='Leandro Roser',
       author_email='learoser@gmail.com',

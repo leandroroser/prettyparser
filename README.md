@@ -64,7 +64,7 @@ Remove the line below:
 Remove empty lines and finally separate each line with a blank line.
 
 
-Below is the page number.
+Below is the page number->.
 99
 """
 parser = PrettyParser(txt, mode = "pyobj", args = [[r"\s*header to remove\s*\n",r""],

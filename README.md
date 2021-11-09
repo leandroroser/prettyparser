@@ -5,7 +5,7 @@
 
 prettyparser is a library for parsing PDF/TXT and Python objects with text (str, list) using regular expressions. 
 In case of PDF files, the package reads the content using pdfplumber and then performs a series of
-data manipulations to generate better output, removing boilerplate code to read the content. The package allows to customize the data processing steps.
+data manipulations to generate a higher quality output, removing the boilerplate code needed to read/write the content. A custom processing function using pdfplumber that takes a page and return a processed text is also allowed. Additional data processing steps can be customized with custom regular expressions.
 
 
 ## Installation
@@ -25,14 +25,14 @@ from prettyparser import PrettyParser
 
 directory = "./BOOKS/PDF"
 output = "./BOOKS/TXT"
-parser = PrettyParser(directory, output, args=[[r"(\n\s*\d+\s*\n)|(\n\s*\d+\s*$)", r'\n\n'],
-                                                [r"\n\s*-\d-\s*\n", r'\n\n'], 
-                                                [r"\n\s*(\* *)+\s*\n", r'\n\n'],
-                                                [r"__some_header_text", r'\n\n', re.IGNORECASE],
-                                                remove_whitelines = True,
-                                                paragraphs_spacing = 1,
-                                                join_broken_words = True,
-                                                mode = 'pdf')
+parser = PrettyParser(directory, output, mode = 'pdf' 
+                      args=[[r"(\n\s*\d+\s*\n)|(\n\s*\d+\s*$)", r'\n\n'],
+                            [r"\n\s*-\d-\s*\n", r'\n\n'], 
+                            [r"\n\s*(\* *)+\s*\n", r'\n\n'],
+                            [r"__some_header_text", r'\n\n', re.IGNORECASE]],
+                            remove_whitelines = True,
+                            paragraphs_spacing = 1,
+                            join_broken_words = True)
 parser.run()
 ```
 
@@ -100,7 +100,9 @@ Arguments
 - paragraphs_spacing (int): number of newlines between paragraphs
 - page_spacing (str): string to insert between pages
 - join_broken_words (bool): if True, join broken words
- 
+- custom_pdf_fun (Callable): custom function to parse pdf files.
+  It must accept a pdfplumber page as argument and return a text to be joined with previous pages.
+  
 License
 -------
 © Leandro Roser, 2021. Licensed under an [Apache-2](https://github.com/leandroroser/prettyparser/blob/main/LICENSE) license.

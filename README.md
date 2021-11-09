@@ -130,6 +130,6 @@ English, Spanish, German, French, Portuguese
 
 License
 -------
-© Leandro Roser, 2021. Licensed under an [Apache-2](https://github.com/leandroroser/prettyparser/blob/main/LICENSE) license.
+© Leandro Roser, 2021. Licensed under an [Apache-2](https://github.com/leandroroser/prettyparser/blob/main/LICENSE.txt) license.
 
 

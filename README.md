@@ -60,7 +60,7 @@ Remove the line below:
 
 * * * 
 
-Remove empty lines and finally separate each line with a blank line
+Remove empty lines and finally separate each line with a blank line.
 
 
 Below is the page number.
@@ -86,7 +86,9 @@ HERE ALSO IS SOME TEXT IN UPPERCASE TO JOIN
 
 Remove the line below: 
 
-Remove empty lines and finally separate each line with a blank line Below is the page number.
+Remove empty lines and finally separate each line with a blank line.
+
+Below is the page number.
 ```
 
 Arguments

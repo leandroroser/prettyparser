@@ -33,6 +33,7 @@ parser = PrettyParser(directory, output, args=[[r"(\n\s*\d+\s*\n)|(\n\s*\d+\s*$)
 parser.run()
 ```
 
+## Example: processing a Python str
 
 ```Python
 import regex as re

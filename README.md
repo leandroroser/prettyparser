@@ -96,7 +96,7 @@ Below is the page number.
 Arguments
 ---------
 - **files (list or str)**: Path to parse for pdf/txt operations. If a string is passed, it will be treated as a directory when mode is 'pdf' or 'txt'. If a str or list is passed when mode is 'pyobj', it will be treated as a str/list of text files already loaded in memory in the corresponding object
-- **output (str)**: output directory.
+- **output (str)**: output directory
 - **args (list)**: list of tuples of the form (regex, replacement, flags)
 - **mode (str)**: 'pdf', 'txt' or 'pyobj' (the latter for Python lists and strings)
 - **default (bool)**: if True, perform several default cleanup operations (default)
@@ -104,8 +104,8 @@ Arguments
 - **paragraphs_spacing (int)**: number of newlines between paragraphs
 - **page_spacing (str)**: string to insert between pages
 - **remove_hyphen_eol (bool)**: if True, join broken words
-- **custom_pdf_fun (Callable)**: custom function to parse pdf files.
-  It must accept a pdfplumber page as argument and return a text to be joined with previous pages.
+- **custom_pdf_fun (Callable)**: custom function to parse pdf files
+  It must accept a pdfplumber page as argument and return a text to be joined with previous pages
 
 Current language support for the default parser
 ------------------------------------------------

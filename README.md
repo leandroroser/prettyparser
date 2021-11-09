@@ -17,9 +17,11 @@ Clone this repository:
     $ pip install -e .
 ```
 
+```html
 <span style="color:orange;">Word up</span>
 
 ## Example: processing a folder with multiple PDF files
+```
 
 ```Python
 import regex as re

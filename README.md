@@ -37,7 +37,24 @@ parser = PrettyParser(directory, output, mode = 'pdf',
 parser.run()
 ```
 
-## Example: processing a Python str
+## Example: processing a folder with multiple TXT files
+Let's assume that the previous output isn't good enough and needs additional corrections. 
+A quicker way for testing additional corrections can be implemented just using the previous TXT output
+
+```Python
+directory = "./BOOKS/TXT"
+output = "./BOOKS/TXT_REPARSED"
+parser = PrettyParser(directory, output,  mode = 'txt', 
+                        args=[[r"some other header.*\d+", r''],
+                            [r"^\d+.*", r'', re.MULTILINE], 
+                            [r"([A-Z]+)( *\n)([A-Z]+)", r'\1\3'],
+                            remove_whitelines = True,
+                            paragraphs_spacing = 1,
+                            remove_hyphen_eol = True)
+parser.run()
+```
+
+## Example: processing a Python str for quick tests of the app
 
 ```Python
 import regex as re

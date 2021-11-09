@@ -7,7 +7,7 @@ prettyparser is a library for parsing PDF/TXT and Python objects with text (str,
 data manipulations to generate better output. The package allows to customize the data processing steps.
 
 
-- Processing PDF files
+- Example Processing PDF files
 
 ```Python
 directory = "./BOOKS/PDF"
@@ -22,6 +22,18 @@ parser = PrettyParser(directory, output, args=[[r"(\n\s*\d+\s*\n)|(\n\s*\d+\s*$)
                                                 mode = 'pdf')
 parser.run()
 ```
+
+Arguments
+---------
+- files (list or str): Path to parse for pdf/txt operations. If a string is passed, it will be treated as a directory when mode is 'pdf' or 'txt'. If a str or list is passed when mode is 'pyobj', it will be treated as a str/list of text files already loaded in memory in the corresponding object
+- output (str): output directory.
+- args (list): list of tuples of the form (regex, replacement, flags)
+- mode (str): 'pdf', 'txt' or 'pyobj' (the latter for Python lists and strings)
+- default (bool): if True, perform several default cleanup operations
+- remove_whitelines (bool): if True, remove whitespaces
+- paragraphs_spacing (int): number of newlines between paragraphs
+- page_spacing (str): string to insert between pages
+- join_broken_words (bool): if True, join broken words
  
 License
 -------

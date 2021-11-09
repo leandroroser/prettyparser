@@ -69,7 +69,8 @@ Below is the page number.
 parser = PrettyParser(txt, mode = "pyobj", args=[[r"\s*header to remove\s*\n",r""],
                                                 [r"(\n\s*\d+\s*\n)", '\n\n'],
                                                 [r"\n\s*(\* *)+\s*\n", '\n\n'],
-                                                [r"\n.*some other ugly stuff.*", '\n\n', re.IGNORECASE]],
+                                                [r"\n.*some other ugly stuff.*", 
+                                                 '\n\n', re.IGNORECASE]],
                                                 remove_whitelines = True,
                                                 paragraphs_spacing = 1,
                                                 join_broken_words = True)

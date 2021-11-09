@@ -3,7 +3,7 @@
 ===========
 
 
-prettyparser is a library for parsing PDF/TXT and Python objects with text (str, list) using regular expressions. The package allows to read PDF files using pdfplumber and then performs a series of
+prettyparser is a library for parsing PDF/TXT and Python objects with text (str, list) using regular expressions. In case of PDF files, the package reads the content using pdfplumber and then performs a series of
 data manipulations to generate better output. The package allows to customize the data processing steps.
 
 

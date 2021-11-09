@@ -1,6 +1,6 @@
 
 ![icon](https://user-images.githubusercontent.com/10769732/140857203-e0580717-52c3-4cdd-affc-00ad5bf0a526.png)
-===========
+
 
 
 prettyparser is a Python library for parsing PDF/TXT and Python objects with text (str, list) using regular expressions. 
@@ -11,10 +11,15 @@ data manipulations to generate a higher quality output, removing the boilerplate
 ## Installation
 
 ```
-Clone this repository:
-    $ git clone https://github.com/leandroroser/prettyparser
-    $ cd prettyparser
-    $ pip install -e .
+$ git clone https://github.com/leandroroser/prettyparser
+$ cd prettyparser
+$ pip install -e .
+```
+
+or
+
+```
+$ pip install prettyparser
 ```
 
 ## Example: processing a folder with multiple PDF files

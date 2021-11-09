@@ -33,7 +33,7 @@ parser = PrettyParser(directory, output, mode = 'pdf',
                             [r"__some_header_text", r'\n\n', re.IGNORECASE]],
                             remove_whitelines = True,
                             paragraphs_spacing = 1,
-                            remove_hypen_eol = True)
+                            remove_hyphen_eol = True)
 parser.run()
 ```
 

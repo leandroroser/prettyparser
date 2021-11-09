@@ -39,7 +39,7 @@ parser.run()
 
 ## Example: processing a folder with multiple TXT files
 Let's assume that the previous output isn't good enough and needs additional corrections. 
-A quicker way for testing additional corrections can be implemented just using the previous TXT output
+A quicker way for testing additional corrections can be implemented just using the previous TXT output:
 
 ```Python
 directory = "./BOOKS/TXT"

@@ -59,7 +59,7 @@ parser = PrettyParser(directory, output,  mode = 'txt',
 parser.run()
 ```
 
-## Example: processing a Python str for quick tests of the app
+## Example: processing a Python str for a quick test of the app
 
 ```Python
 import regex as re

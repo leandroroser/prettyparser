@@ -30,7 +30,7 @@ except:
 
 
 setup(name='prettyparser',
-      version='1.0.8',
+      version='1.0.9',
       description= description,
       author='Leandro Roser',
       author_email='learoser@gmail.com',

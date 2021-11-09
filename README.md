@@ -26,7 +26,7 @@ from prettyparser import PrettyParser
 
 directory = "./BOOKS/PDF"
 output = "./BOOKS/TXT"
-parser = PrettyParser(directory, output, mode = 'pdf' 
+parser = PrettyParser(directory, output, mode = 'pdf',
                       args = [[r"(\n\s*\d+\s*\n)|(\n\s*\d+\s*$)", r'\n\n'],
                             [r"\n\s*-\d-\s*\n", r'\n\n'], 
                             [r"\n\s*(\* *)+\s*\n", r'\n\n'],

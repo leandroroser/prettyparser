@@ -1,10 +1,13 @@
+#!/usr/bin/env python
+
 import pdfplumber
 import regex as re
 import time
-import argparse
 from tqdm import tqdm
-import functools
-from typing import Union, Optional,Callable,List
+from typing import (Union,
+                    Optional,
+                    Callable,
+                    List)
 
 class PrettyParser:
     """Parse pdf/txt files or python strings/lists and perfom cleanup operations over the text
@@ -17,18 +20,20 @@ class PrettyParser:
         output (str): output directory.
         args (list): list of tuples of the form (regex, replacement, flags)
         mode (str): 'pdf', 'txt' or 'list'
-        default (bool): if True, perform default cleanup operations
+        default (bool): if True, perform several default cleanup operations
         remove_whitelines (bool): if True, remove whitespaces
         paragraphs_spacing (int): number of newlines between paragraphs
         page_spacing (str): string to insert between pages
         join_broken_words (bool): if True, join broken words
+        custom_pdf_fun (Callable): custom function to parse pdf files.
+        It must accept a pdfplumber page as argument and return a text to be joined with previous pages.
 
     Returns:
         list or str: list of parsed files or string when output = None
     """
     def __init__(self, files:Union[str, List[str]], output:str = None, args:list = None, mode:str = "path", 
                  default:bool = True, remove_whitelines:bool = False, paragraphs_spacing:int = 0,
-                 page_spacing:str = "\n\n", join_broken_words:bool = False):
+                 page_spacing:str = "\n\n", join_broken_words:bool = False, custom_pdf_fun = None):
         
         self.files = files
         self.output = output
@@ -49,12 +54,13 @@ class PrettyParser:
         self.paragraphs_spacing = "\n" * (paragraphs_spacing + 1) if paragraphs_spacing else None
         self.page_spacing = page_spacing
         self.join_broken_words = join_broken_words
+        self.custom_pdf_fun = custom_pdf_fun
 
         upper = "A-ZÀÂÄÁÈÊËÉÎÏÍÔÖÓÙÛÜÚÑßŸ"
         lower = "a-zàâäáèéêëíîïôöóùûüúñßÿ"
-        chars = ",:\(\[{;\'\"—"
+        chars = ",\(\[{;\'\"—"
         self.p1 = re.compile(fr"([{lower}0-9]+[ \t]*[,;:\]*[0-9]*)([{chars}]?[ \t]*)(\n+)")
-        self.p2 = re.compile(fr"([{upper}]+[ \t]*[,;:\-]*[0-9]*)([{chars}]?[ \t]*?)(?:\n+)([{upper}]+[ \t]*)")
+        self.p2 = re.compile(fr"([{upper}]+[ \t]*[,;:\-]*[0-9]*)([{chars}]?[ \t]*?)(?:\n+)([{upper}]+[ \t])")
         self.p3 = re.compile(fr"(([n|N]°)|•)([ \t]*\n[ \t]*)+")
         self.p4 = re.compile(r"[ \t]+")
         self.p5 = re.compile(r"(?<=\n)[ \t]+")
@@ -112,10 +118,17 @@ class PrettyParser:
         all_text = ''
         with pdfplumber.open(fullpath) as pdf:
             for pdf_page in tqdm(pdf.pages, total = len(pdf.pages)):
-                single_page_text = pdf_page.extract_text()
-                if not single_page_text:
-                    continue
-                all_text = all_text + (self.page_spacing if i!=1 else "") + single_page_text
+                if self.custom_pdf_fun:
+                    single_page_text = self.custom_pdf_fun(pdf_page)
+                    if not single_page_text:
+                        continue
+                    else:
+                        all_text += single_page_text
+                else:
+                    single_page_text = pdf_page.extract_text()
+                    if not single_page_text:
+                        continue
+                    all_text = all_text + (self.page_spacing if i!=1 else "") + single_page_text
         return all_text
     
 
@@ -148,7 +161,10 @@ class PrettyParser:
             try:
                 start = time.time()
                 cl = self.cleanup(filename)
-                cl = self.p9.sub("" , cl)
+                if self.default:
+                    cl = self.p9.sub("" , cl)
+                if self.paragraphs_spacing:
+                    cl = self.p10.sub(self.paragraphs_spacing, cl)
                 out.append(cl)
                 end = time.time()
                 time_average = time_average + (end - start)

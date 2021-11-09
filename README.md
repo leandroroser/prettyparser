@@ -73,7 +73,7 @@ output = parser.run()
 print(output[0])
 ```
 
-```Python
+```
 This is a text with multiple problems. For example the latter word can be joined.
 
 The portions of this line can be joined in a single line.

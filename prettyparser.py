@@ -56,8 +56,8 @@ class PrettyParser:
         self.remove_hyphen_eol = remove_hyphen_eol
         self.custom_pdf_fun = custom_pdf_fun
 
-        upper = "A-ZÀÂÄÁÈÊËÉÎÏÍÔÖÓÙÛÜÚÑßŸ"
-        lower = "a-zàâäáèéêëíîïôöóùûüúñßÿ"
+        upper = "A-ZÀÂÄÁÈÊËÉÎÏÍÔÖÓÙÛÜÚÑßŸÇÕ"
+        lower = "a-zàâäáèéêëíîïôöóùûüúñßÿçõ"
         chars = ",\(\[{;\'\"—"
         self.p1 = re.compile(fr"([{lower}0-9]+[ \t]*[,;:\]*[0-9]*)([{chars}]?[ \t]*)(\n+)")
         self.p2 = re.compile(fr"([{upper}]+[ \t]*[,;:\-]*[0-9]*)([{chars}]?[ \t]*?)(?:\n+)([{upper}]+[ \t])")

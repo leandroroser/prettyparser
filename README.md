@@ -126,7 +126,7 @@ Arguments
 
 Current language support for the default parser
 ------------------------------------------------
-English, Spanish, German, French 
+English, Spanish, German, French, Portuguese
 
 License
 -------

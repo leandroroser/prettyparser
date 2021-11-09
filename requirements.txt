@@ -1,0 +1,4 @@
+pdfplumber
+regex
+tqdm
+typing

@@ -13,9 +13,9 @@ data manipulations to generate a higher quality output, removing the boilerplate
 ```
 Clone this repository:
     $ git clone https://github.com/leandroroser/prettyparser
-    $ pip install -r requirements.txt
+    $ cd prettyparser
+    $ python setup.py install
 ```
-
 
 ## Example: processing a folder with multiple PDF files
 
@@ -102,7 +102,7 @@ Arguments
 - join_broken_words (bool): if True, join broken words
 - custom_pdf_fun (Callable): custom function to parse pdf files.
   It must accept a pdfplumber page as argument and return a text to be joined with previous pages.
-  
+
 License
 -------
 © Leandro Roser, 2021. Licensed under an [Apache-2](https://github.com/leandroroser/prettyparser/blob/main/LICENSE) license.

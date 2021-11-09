@@ -33,7 +33,7 @@ parser = PrettyParser(directory, output, mode = 'pdf',
                             [r"__some_header_text", r'\n\n', re.IGNORECASE]],
                             remove_whitelines = True,
                             paragraphs_spacing = 1,
-                            join_broken_words = True)
+                            remove_hypen_eol = True)
 parser.run()
 ```
 
@@ -74,7 +74,7 @@ parser = PrettyParser(txt, mode = "pyobj", args = [[r"\s*header to remove\s*\n",
                                                     r'\n\n', re.IGNORECASE]],
                                                     remove_whitelines = True,
                                                     paragraphs_spacing = 1,
-                                                    join_broken_words = True)
+                                                    remove_hyphen_eol = True)
 output = parser.run()
 print(output[0])
 ```
@@ -103,7 +103,7 @@ Arguments
 - **remove_whitelines (bool)**: if True, remove whitespaces
 - **paragraphs_spacing (int)**: number of newlines between paragraphs
 - **page_spacing (str)**: string to insert between pages
-- **join_broken_words (bool)**: if True, join broken words
+- **remove_hyphen_eol (bool)**: if True, join broken words
 - **custom_pdf_fun (Callable)**: custom function to parse pdf files.
   It must accept a pdfplumber page as argument and return a text to be joined with previous pages.
 

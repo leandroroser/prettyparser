@@ -24,7 +24,7 @@ class PrettyParser:
         remove_whitelines (bool): if True, remove whitespaces
         paragraphs_spacing (int): number of newlines between paragraphs
         page_spacing (str): string to insert between pages
-        join_broken_words (bool): if True, join broken words
+        remove_hyphen_eol (bool): if True, join broken words
         custom_pdf_fun (Callable): custom function to parse pdf files.
         It must accept a pdfplumber page as argument and return a text to be joined with previous pages.
 
@@ -33,7 +33,7 @@ class PrettyParser:
     """
     def __init__(self, files:Union[str, List[str]], output:str = None, args:list = None, mode:str = "path", 
                  default:bool = True, remove_whitelines:bool = False, paragraphs_spacing:int = 0,
-                 page_spacing:str = "\n\n", join_broken_words:bool = False, custom_pdf_fun = None):
+                 page_spacing:str = "\n\n", remove_hyphen_eol:bool = False, custom_pdf_fun = None):
         
         self.files = files
         self.output = output
@@ -53,7 +53,7 @@ class PrettyParser:
         self.remove_whitelines = remove_whitelines
         self.paragraphs_spacing = "\n" * (paragraphs_spacing + 1) if paragraphs_spacing else None
         self.page_spacing = page_spacing
-        self.join_broken_words = join_broken_words
+        self.remove_hyphen_eol = remove_hyphen_eol
         self.custom_pdf_fun = custom_pdf_fun
 
         upper = "A-ZÀÂÄÁÈÊËÉÎÏÍÔÖÓÙÛÜÚÑßŸ"
@@ -96,7 +96,7 @@ class PrettyParser:
             #x = self.p6.sub(lambda y: y.group(2).title() if not y.group(2).startswith('.') else y.group(2), x)
             if self.remove_whitelines:
                 x = self.p7.sub(r"\2", x)
-            if self.join_broken_words:
+            if self.remove_hyphen_eol:
                 x = self.p11.sub(r"\2", x)
             if self.paragraphs_spacing:
                 x = self.p8.sub(fr"\1{self.paragraphs_spacing}", x)

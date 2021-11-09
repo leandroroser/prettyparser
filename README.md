@@ -26,7 +26,7 @@ from prettyparser import PrettyParser
 directory = "./BOOKS/PDF"
 output = "./BOOKS/TXT"
 parser = PrettyParser(directory, output, mode = 'pdf' 
-                      args=[[r"(\n\s*\d+\s*\n)|(\n\s*\d+\s*$)", r'\n\n'],
+                      args = [[r"(\n\s*\d+\s*\n)|(\n\s*\d+\s*$)", r'\n\n'],
                             [r"\n\s*-\d-\s*\n", r'\n\n'], 
                             [r"\n\s*(\* *)+\s*\n", r'\n\n'],
                             [r"__some_header_text", r'\n\n', re.IGNORECASE]],
@@ -66,14 +66,14 @@ Remove empty lines and finally separate each line with a blank line.
 Below is the page number.
 99
 """
-parser = PrettyParser(txt, mode = "pyobj", args=[[r"\s*header to remove\s*\n",r""],
-                                                [r"(\n\s*\d+\s*\n)", r'\n\n'],
-                                                [r"\n\s*(\* *)+\s*\n", r'\n\n'],
-                                                [r"\n.*some other ugly stuff.*", 
-                                                 r'\n\n', re.IGNORECASE]],
-                                                remove_whitelines = True,
-                                                paragraphs_spacing = 1,
-                                                join_broken_words = True)
+parser = PrettyParser(txt, mode = "pyobj", args = [[r"\s*header to remove\s*\n",r""],
+                                                    [r"(\n\s*\d+\s*\n)", r'\n\n'],
+                                                    [r"\n\s*(\* *)+\s*\n", r'\n\n'],
+                                                    [r"\n.*some other ugly stuff.*", 
+                                                    r'\n\n', re.IGNORECASE]],
+                                                    remove_whitelines = True,
+                                                    paragraphs_spacing = 1,
+                                                    join_broken_words = True)
 output = parser.run()
 print(output[0])
 ```

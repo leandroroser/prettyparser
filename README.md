@@ -9,9 +9,11 @@ data manipulations to generate better output. The package allows to customize th
 
 ## Installation
 
+```
 Clone this repository:
     $ git clone https://github.com/leandroroser/prettyparser
     $ pip install -r requirements.txt
+```
 
 
 ## Example: processing PDF files

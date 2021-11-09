@@ -53,7 +53,7 @@ The portions of this line can be
 joined
 in a single line.
 HERE ALSO IS SOME
-TEXT IN UPPERCASE
+UPPERCASE TEXT
 TO JOIN
 Some Other Ugly Stuff To Remove IGNORING Case. 
 
@@ -84,7 +84,7 @@ This is a text with multiple problems. For example the latter word can be joined
 
 The portions of this line can be joined in a single line.
 
-HERE ALSO IS SOME TEXT IN UPPERCASE TO JOIN
+HERE ALSO IS SOME UPPERCASE CASE TEXT TO JOIN
 
 Remove the line below: 
 

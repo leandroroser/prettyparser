@@ -10,23 +10,23 @@ from typing import (Union,
                     List)
 
 class PrettyParser:
-    """Parse pdf/txt files or python strings/lists and perfom cleanup operations over the text
+    """Parse pdf/txt files or python strings/lists and perfom cleanup operations to enhance the text quality
 
     Args:
-        files (list or str): Path to parse for pdf/txt operations.
-        If a string is passed, it will be treated as a directory when mode is 'pdf' or 'txt'.
+        files (list or str): Path to parse for pdf/txt operations
+        If a string is passed, it will be treated as a directory when mode is 'pdf' or 'txt'
         If a str or list is passed when mode is 'pyobj', 
         it will be treated as a str/list of text files already loaded in memory in the corresponding object
-        output (str): output directory.
+        output (str): output directory
         args (list): list of tuples of the form (regex, replacement, flags)
         mode (str): 'pdf', 'txt' or 'list'
         default (bool): if True, perform several default cleanup operations
         remove_whitelines (bool): if True, remove whitespaces
         paragraphs_spacing (int): number of newlines between paragraphs
         page_spacing (str): string to insert between pages
-        remove_hyphen_eol (bool): if True, join broken words
-        custom_pdf_fun (Callable): custom function to parse pdf files.
-        It must accept a pdfplumber page as argument and return a text to be joined with previous pages.
+        remove_hyphen_eol (bool): if True, if True, remove end of line hyphens and merge subwords
+        custom_pdf_fun (Callable): custom function to parse pdf files
+        It must accept a pdfplumber page as argument and return a text to be joined with previous pages
 
     Returns:
         list or str: list of parsed files or string when output = None

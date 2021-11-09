@@ -103,7 +103,7 @@ Arguments
 - **remove_whitelines (bool)**: if True, remove whitespaces
 - **paragraphs_spacing (int)**: number of newlines between paragraphs
 - **page_spacing (str)**: string to insert between pages
-- **remove_hyphen_eol (bool)**: if True, join broken words
+- **remove_hyphen_eol (bool)**: if True, remove end of line hyphens and merge subwords
 - **custom_pdf_fun (Callable)**: custom function to parse pdf files
   It must accept a pdfplumber page as argument and return a text to be joined with previous pages
 

@@ -5,7 +5,7 @@
 
 prettyparser is a Python library for parsing PDF/TXT and Python objects with text (str, list) using regular expressions. 
 In case of PDF files, the package reads the content using pdfplumber and then performs a series of
-data manipulations to generate a higher quality output, removing the boilerplate code needed to read/process/write the content of multiple files with multiple pages. A custom processing function using pdfplumber that takes a page and return a processed text is also allowed. Additional data processing steps can be customized with custom regular expressions.
+data manipulations to generate a higher quality output, removing the boilerplate code needed to read/process/write the content of multiple files with multiple pages. A custom processing function using pdfplumber that takes a page and returns a processed text is also allowed. Additional data processing steps can be customized with custom regular expressions.
 
 
 ## Installation

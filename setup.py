@@ -17,5 +17,6 @@ setup(name='prettyparser',
       author_email='learoser@gmail.com',
       url='https://www.python.org/sigs/distutils-sig/',
       install_requires=install_requires,
+      license='ASL',
       python_requires='>=3.6'
      )

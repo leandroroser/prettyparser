@@ -14,7 +14,7 @@ data manipulations to generate a higher quality output, removing the boilerplate
 Clone this repository:
     $ git clone https://github.com/leandroroser/prettyparser
     $ cd prettyparser
-    $ python setup.py install
+    $ pip install -e .
 ```
 
 ## Example: processing a folder with multiple PDF files

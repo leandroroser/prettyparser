@@ -18,7 +18,7 @@ class PrettyParser:
         If a str or list is passed when mode is 'pyobj', 
         it will be treated as a str/list of text files already loaded in memory in the corresponding object
         output (str): output directory
-        args (list): list of tuples of the form (regex, replacement, flags)
+        args (list): list of tuples of the form (regex, replacement, flags). The flag can be absent.
         mode (str): 'pdf', 'txt' or 'list'
         default (bool): if True, perform several default cleanup operations
         remove_whitelines (bool): if True, remove whitespaces

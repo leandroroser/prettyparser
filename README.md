@@ -97,7 +97,7 @@ Arguments
 ---------
 - **files (list or str)**: Path to parse for pdf/txt operations. If a string is passed, it will be treated as a directory when mode is 'pdf' or 'txt'. If a str or list is passed when mode is 'pyobj', it will be treated as a str/list of text files already loaded in memory in the corresponding object
 - **output (str)**: output directory
-- **args (list)**: list of tuples of the form (regex, replacement, flags)
+- **args (list)**: list of tuples of the form (regex, replacement, flags). The flag can be absent.
 - **mode (str)**: 'pdf', 'txt' or 'pyobj' (the latter for Python lists and strings)
 - **default (bool)**: if True, perform several default cleanup operations (default)
 - **remove_whitelines (bool)**: if True, remove whitespaces

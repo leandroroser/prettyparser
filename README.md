@@ -1,4 +1,4 @@
-<img src=https://raw.githubusercontent.com/dmlc/dmlc.github.io/master/img/logo-m/xgboost.png width=135/>  eXtreme Gradient Boosting
+![icon](https://user-images.githubusercontent.com/10769732/140849397-d0cf1c44-2d57-4318-80f4-3530ac0df98f.png)
 ===========
 
 

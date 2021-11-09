@@ -61,7 +61,7 @@ Remove the line below:
 
 * * * 
 
-Remove empty lines and finally separate each line with a blank line.
+Remove empty lines and finally separate paragraph with a blank line.
 
 
 Below is the page number->.

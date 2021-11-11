@@ -8,6 +8,7 @@ from typing import (Union,
                     Optional,
                     Callable,
                     List)
+import os
 
 class PrettyParser:
     """Parse pdf/txt files or python strings/lists and perfom cleanup operations to enhance the text quality

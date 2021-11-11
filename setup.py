@@ -5,7 +5,7 @@ import os
 import re
 from pathlib import Path
 
-lib = os.path.dirname(os.path.realpath("./prettyparser"))
+lib = os.path.dirname(os.path.realpath(__file__))
 reqpath = os.path.join(lib, 'requirements.txt')
 install_requires = [] 
 if os.path.isfile(reqpath):
@@ -30,7 +30,7 @@ except:
 
 
 setup(name='prettyparser',
-      version='1.0.10',
+      version='1.0.11',
       description= description,
       author='Leandro Roser',
       author_email='learoser@gmail.com',

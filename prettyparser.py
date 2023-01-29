@@ -33,7 +33,8 @@ class PrettyParser:
     Returns:
         list or str: list of parsed files or string when output = None
     """
-    def __init__(self, directories:str|List[str]|None, files:str|List[str]|None, output:str|None = None, args:list|None = None, mode:str = "path", 
+    def __init__(self, directories:str|List[str]|None = None, files:str|List[str]|None = None, 
+                 output:str|None = None, args:list|None = None, mode:str = "path", 
                  default:bool = True, remove_whitelines:bool = False, paragraphs_spacing:int = 0,
                  page_spacing:str = "\n\n", remove_hyphen_eol:bool = False, custom_pdf_fun: Callable|None = None):
         

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import pdfplumber
 import regex as re
 import time
 from tqdm import tqdm
@@ -12,6 +11,12 @@ import os
 from pathlib import Path
 from joblib import Parallel, delayed
 import multiprocessing
+import io
+from pdfminer.converter import TextConverter
+from pdfminer.pdfinterp import PDFPageInterpreter
+from pdfminer.pdfinterp import PDFResourceManager
+from pdfminer.pdfpage import PDFPage
+  
 
 
 class PDFError(Exception):
@@ -117,6 +122,7 @@ class PrettyParser:
         #self.pend = re.compile(r"( *\n *)+")
         self.overwrite = overwrite
     
+
     def cleanup(self, x:str) -> str:
         """
         Args:
@@ -145,6 +151,8 @@ class PrettyParser:
         return x
 
 
+  
+
     def pretty_parser_pdf(self, fullpath:str) -> str:
         """
         Args:
@@ -158,16 +166,27 @@ class PrettyParser:
         all_text = ''
         i = 1
         try:
-            with pdfplumber.open(fullpath) as pdf:
-                for pdf_page in pdf.pages:
+            with open(fullpath, "rb") as f:
+                for pdf_page in PDFPage.get_pages(f, 
+                                    caching=True,
+                                    check_extractable=True):
+                    resource_manager = PDFResourceManager()
+                    fake_file_handle = io.StringIO()
+                    converter = TextConverter(resource_manager, 
+                                            fake_file_handle)
+                    
+                    page_interpreter = PDFPageInterpreter(resource_manager, converter)
+                    page_interpreter.process_page(pdf_page)
+                    converter.close()
+                    single_page_text = fake_file_handle.getvalue()
+                    fake_file_handle.close()
                     if self.custom_pdf_fun:
-                        single_page_text = self.custom_pdf_fun(pdf_page)
+                        single_page_text = self.custom_pdf_fun(single_page_text)
                         if not single_page_text:
                             continue
                         else:
                             all_text += single_page_text
                     else:
-                        single_page_text = pdf_page.extract_text()
                         if not single_page_text:
                             continue
                         all_text = all_text + (self.page_spacing if i!=1 else "") + single_page_text
@@ -175,7 +194,7 @@ class PrettyParser:
         except PDFError as e:
             print(e)
         return all_text
-    
+        
 
     def pretty_parser_txt(self, fullpath:str) -> str:
         """

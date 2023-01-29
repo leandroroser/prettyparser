@@ -183,7 +183,7 @@ class PrettyParser:
         Returns:
             list: list of cleaned up strings
         """
-        def wrapper(directory, file, output):
+        def wrapper(directory:str, file:str|None, output: str|None):
 
             if file is not None:
                 total_files = [os.path.join(directory, file)]

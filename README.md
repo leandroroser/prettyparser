@@ -139,7 +139,7 @@ Below is the page number->.
 
 ## Runnning from the command line
 
-"""
+```
  prettyparser --directories /home/BOOKS --output /home/BOOKS_PARSED --mode 'pdf'
 ```
 

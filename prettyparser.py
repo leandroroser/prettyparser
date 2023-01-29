@@ -245,7 +245,7 @@ class PrettyParser:
             if not os.path.exists(self.files):
                 raise FileNotFoundError(f"{self.files} not found")
             parser = self.parse_files(self.mode)
-            out = parser(self.directory, self.files, self.output)
+            out = parser(self.directories, self.files, self.output)
             if not self.output:
                 return out
         else:

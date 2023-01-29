@@ -241,7 +241,7 @@ class PrettyParser:
                         print(f"\033[92m * Processed files: { 100 *(i+1)/(number_files):.1f} % \033[0m")
                 except Exception as e:
                     print(f"\033[91m + Error: {e} \033[0m")
-                if not output:
+                if not self.output:
                     return out
         return wrapper
 
@@ -272,4 +272,3 @@ class PrettyParser:
         else:
             out = self.pretty_parser_list(self.files)
             return out
-

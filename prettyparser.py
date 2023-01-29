@@ -183,13 +183,16 @@ class PrettyParser:
         Returns:
             list: list of cleaned up strings
         """
-        def wrapper(directory:str, file:str|None, output: str|None):
+        def wrapper(directory:str|None, file:str|None, output: str|None):
 
-            if file is not None:
-                total_files = [os.path.join(directory, file)]
+            if directory is None and file is None:
+                TypeError("you should provide a directory, a list of directories, a file or a list of files")
+
+            if file is not None and isinstance(file, "str"):
+                total_files = [file]
             else:
-                total_files = os.listdir(directory)
-            number_files = len(total_files)
+                total_files = [os.path.join(top, file) for thisdir in directory for top, dirs, files in os.walk(thisdir)]
+                number_files = len(total_files)
 
             for i,filename in enumerate(total_files):
                 try:
@@ -224,6 +227,7 @@ class PrettyParser:
                 if not output:
                     return out
         return wrapper
+        
     
     def run(self)->Optional[Union[str, List[str]]]:
         """
@@ -234,10 +238,14 @@ class PrettyParser:
             if not os.path.exists(self.files):
                 raise FileNotFoundError(f"{self.files} not found")
             parser = self.parse_files(self.mode)
-            out = parser(self.files, self.output)
+            out = parser(self.directory, self.files, self.output)
             if not self.output:
                 return out
         else:
+            if self.directory is not None and self.files is not None:
+                raise TypeError("Only one of this arguments should be provided: directory, files")
+            if not isinstance(self.directory, (list, str)):
+                raise TypeError("directory must be a list or str")
             if not isinstance(self.files, (list, str)):
                 raise TypeError("files must be a list or str")
             out = self.pretty_parser_list(self.files)

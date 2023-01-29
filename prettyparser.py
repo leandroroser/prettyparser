@@ -189,18 +189,22 @@ class PrettyParser:
         """
         def wrapper(directory:str|None, file:str|None, output: str|None):
 
-            if file is not None and isinstance(file, "str"):
-                total_files = [os.path.join(os.path.abspath(file), file)]
-            elif isinstance(file, list):
-                total_files = [os.path.join(os.path.abspath(x), x) for x in file]
+            out = {}
+            if file is not None:
+                if isinstance(file, str):
+                    total_files = [os.path.join(os.path.abspath(file), file)]
+                elif isinstance(file, list):
+                    total_files = [os.path.join(os.path.abspath(x), x) for x in file]
             
-            if directory is not None and isinstance(directory, "str"):
-                total_files = [os.path.abspath(directory)]
-            else:
-                total_files = [os.path.join(top, file) for thisdir in directory for top, dirs, files in os.walk(thisdir)]
+            if directory is not None:
+                if isinstance(directory, str):
+                    total_files = [os.path.abspath(directory)]
+                else:
+                    total_files = [os.path.join(top, file) for thisdir in directory for top, dirs, files in os.walk(thisdir)]
             
             number_files = len(total_files)
-
+            time_elapsed = 0
+            
             for i,filename in enumerate(total_files):
                 try:
                     if filename.endswith(datatype):
@@ -257,6 +261,4 @@ class PrettyParser:
                 raise TypeError("files must be a list or str")
             out = self.pretty_parser_list(self.files)
             return out
-
-
 

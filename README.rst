@@ -201,6 +201,7 @@ print(output[0])
 
 ```
 
+
 ```
 
 This is a text with multiple problems. For example the latter word can be joined.
@@ -220,8 +221,11 @@ Below is the page number->.
 # Runnning from the command line
 ================================
 
+
 ```
+
  prettyparser --directories /home/BOOKS --output /home/BOOKS_PARSED --mode 'pdf'
+ 
 ```
 
 

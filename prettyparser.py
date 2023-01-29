@@ -9,6 +9,7 @@ from typing import (Union,
                     Callable,
                     List)
 import os
+from pathlib import Path
 
 class PrettyParser:
     """Parse pdf/txt files or python strings/lists and perfom cleanup operations to enhance the text quality
@@ -36,7 +37,8 @@ class PrettyParser:
     def __init__(self, directories:str|List[str]|None = None, files:str|List[str]|None = None, 
                  output:str|None = None, args:list|None = None, mode:str = "path", 
                  default:bool = True, remove_whitelines:bool = False, paragraphs_spacing:int = 0,
-                 page_spacing:str = "\n\n", remove_hyphen_eol:bool = False, custom_pdf_fun: Callable|None = None):
+                 page_spacing:str = "\n\n", remove_hyphen_eol:bool = False, custom_pdf_fun: Callable|None = None,
+                 overwrite:bool = False):
 
         if directories is not None and files is not None:
             raise TypeError("Only one of this arguments should be provided: directory, files")
@@ -96,9 +98,7 @@ class PrettyParser:
         self.p11 = re.compile(fr"(-)(?:[ \t]*?[\d]*?\n+[ \t]*?)([{lower}{upper}])")
         #self.p7 = re.compile(r"([.,;])(\w)", flags= re.UNICODE)
         #self.pend = re.compile(r"( *\n *)+")
-        if output:
-            if not os.path.exists(output):
-                os.makedirs(output)
+        self.overwrite = self.overwrite
     
     def cleanup(self, x:str) -> str:
         """
@@ -228,6 +228,8 @@ class PrettyParser:
                             all_text = self.p10.sub(self.paragraphs_spacing, all_text)
                         if self.output:
                             outpath = f'{self.output}/{re.sub(".pdf", ".txt", filename)}'
+                            if not os.path.exist_ok(self.output):
+                                Path(self.output).mkdir(parents=True, exist_ok=self.overwrite)
                             with open(outpath, 'w') as f:
                                 f.write(all_text) 
                                 f.close()

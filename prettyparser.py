@@ -14,7 +14,8 @@ class PrettyParser:
     """Parse pdf/txt files or python strings/lists and perfom cleanup operations to enhance the text quality
 
     Args:
-        files (list or str): Path to parse for pdf/txt operations
+        Directories (list, str or None): Paths with folders to parse for pdf/txt operations
+        files (list, str or None): Path with files to parse for pdf/txt operations
         If a string is passed, it will be treated as a directory when mode is 'pdf' or 'txt'
         If a str or list is passed when mode is 'pyobj', 
         it will be treated as a str/list of text files already loaded in memory in the corresponding object
@@ -32,10 +33,13 @@ class PrettyParser:
     Returns:
         list or str: list of parsed files or string when output = None
     """
-    def __init__(self, files:Union[str, List[str]], output:str|None = None, args:list|None = None, mode:str = "path", 
+    def __init__(self, directories:str|List[str]|None, files:str|List[str]|None, output:str|None = None, args:list|None = None, mode:str = "path", 
                  default:bool = True, remove_whitelines:bool = False, paragraphs_spacing:int = 0,
                  page_spacing:str = "\n\n", remove_hyphen_eol:bool = False, custom_pdf_fun: Callable|None = None):
         
+        if directories is None and files is None:
+            TypeError("you should provide a directory, a list of directories, a file or a list of files")
+        self.directories = directories
         self.files = files
         self.output = output
         if args:
@@ -185,14 +189,17 @@ class PrettyParser:
         """
         def wrapper(directory:str|None, file:str|None, output: str|None):
 
-            if directory is None and file is None:
-                TypeError("you should provide a directory, a list of directories, a file or a list of files")
-
             if file is not None and isinstance(file, "str"):
                 total_files = [file]
+            elif isinstance(file, list):
+                total_files = [os.path.join(os.path.abspath(file), file)]
+            
+            if directory is not None and isinstance(directory, "str"):
+                total_files = [directory]
             else:
                 total_files = [os.path.join(top, file) for thisdir in directory for top, dirs, files in os.walk(thisdir)]
-                number_files = len(total_files)
+            
+            number_files = len(total_files)
 
             for i,filename in enumerate(total_files):
                 try:
@@ -227,7 +234,7 @@ class PrettyParser:
                 if not output:
                     return out
         return wrapper
-        
+
     
     def run(self)->Optional[Union[str, List[str]]]:
         """

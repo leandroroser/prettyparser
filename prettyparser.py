@@ -30,6 +30,7 @@ class PrettyParser:
         remove_hyphen_eol (bool): if True, if True, remove end of line hyphens and merge subwords
         custom_pdf_fun (Callable): custom function to parse pdf files
         It must accept a pdfplumber page as argument and return a text to be joined with previous pages
+        overwrite (bool): overwrite file if exists. Deafault: False.
 
     Returns:
         list or str: list of parsed files or string when output = None
@@ -229,7 +230,8 @@ class PrettyParser:
                         if self.output:
                             try:
                                 fullpath =  re.sub(r"(.*)(/)$", "\\1", self.output) + "/" + re.sub(r"(^/)(.*)", "\\2", os.path.dirname(filename))
-                                os.makedirs(fullpath, exist_ok = False)
+                                if not os.path.exists(fullpath):
+                                    os.makedirs(fullpath)
                                 outpath = os.path.join(fullpath, re.sub(".pdf", ".txt", os.path.basename(filename)))
                             except FileExistsError:
                                 raise

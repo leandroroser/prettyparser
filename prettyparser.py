@@ -37,12 +37,30 @@ class PrettyParser:
                  output:str|None = None, args:list|None = None, mode:str = "path", 
                  default:bool = True, remove_whitelines:bool = False, paragraphs_spacing:int = 0,
                  page_spacing:str = "\n\n", remove_hyphen_eol:bool = False, custom_pdf_fun: Callable|None = None):
-        
-        if directories is None and files is None:
-            TypeError("you should provide a directory, a list of directories, a file or a list of files")
-        self.directories = directories
+
+        if directories is not None and files is not None:
+            raise TypeError("Only one of this arguments should be provided: directory, files")
+
         self.files = files
+        self.directories = directories
+        
+        if files is not None:
+            if isinstance(files, str):
+                self.files = [os.path.join(os.path.abspath(files), files)]
+            elif isinstance(files, list):
+                self.files = [os.path.join(os.path.abspath(x), x) for x in files]
+            else:
+                raise TypeError("files must be a list, str, or None")
+            
+        if directories is not None:
+            if not isinstance(directories, (str,list)):
+                raise TypeError("directories must be a list, str, or None")
+            if isinstance(directories, str):
+                directories = [os.path.abspath(directories)]
+            self.directories = [os.path.join(top, thisfile) for thisdir in directories for top,dirs,thisfiles in os.walk(thisdir) for thisfile in thisfiles]
+            
         self.output = output
+
         if args:
             if not isinstance(args, list):
                 raise TypeError("args must be a list or a string")
@@ -82,7 +100,7 @@ class PrettyParser:
             if not os.path.exists(output):
                 os.makedirs(output)
     
-    def cleanup(self, x:str)->str:
+    def cleanup(self, x:str) -> str:
         """
         Args:
             x (str): string to clean up
@@ -110,7 +128,7 @@ class PrettyParser:
         return x
 
 
-    def pretty_parser_pdf(self, fullpath:str, i:int)->str:
+    def pretty_parser_pdf(self, fullpath:str, i:int) -> str:
         """
         Args:
             directory (str): directory of the pdf file
@@ -137,7 +155,7 @@ class PrettyParser:
         return all_text
     
 
-    def pretty_parser_txt(self, fullpath:str)->str:
+    def pretty_parser_txt(self, fullpath:str) -> str:
         """
         Args:
             directory (str): directory of the txt file
@@ -151,7 +169,7 @@ class PrettyParser:
             all_text = f.read()
         return all_text
 
-    def pretty_parser_list(self, textlist:list)->str|List[str]:
+    def pretty_parser_list(self, textlist:list) -> str|List[str]:
         """
         Args:
             textlist (list): list of strings
@@ -180,28 +198,16 @@ class PrettyParser:
         return out
 
     
-    def parse_files(self, datatype:str)->Callable[[str, str], Optional[List[str]]]:
+    def parse_files(self, datatype:str) -> Callable[[str, str], Optional[List[str]]]:
         """
         Args:
             datatype (str): type of the data to parse
         Returns:
             list: list of cleaned up strings
         """
-        def wrapper(directory:str|None, file:str|None, output: str|None):
 
+        def wrapper(total_files:list):
             out = {}
-            if file is not None:
-                if isinstance(file, str):
-                    total_files = [os.path.join(os.path.abspath(file), file)]
-                elif isinstance(file, list):
-                    total_files = [os.path.join(os.path.abspath(x), x) for x in file]
-            
-            if directory is not None:
-                if isinstance(directory, str):
-                    total_files = [os.path.abspath(directory)]
-                else:
-                    total_files = [os.path.join(top, file) for thisdir in directory for top, dirs, files in os.walk(thisdir)]
-            
             number_files = len(total_files)
             time_elapsed = 0
             
@@ -220,8 +226,8 @@ class PrettyParser:
                         all_text = self.p9.sub("" , all_text)
                         if self.paragraphs_spacing:
                             all_text = self.p10.sub(self.paragraphs_spacing, all_text)
-                        if output:
-                            outpath = f'{output}/{re.sub(".pdf", ".txt", filename)}'
+                        if self.output:
+                            outpath = f'{self.output}/{re.sub(".pdf", ".txt", filename)}'
                             with open(outpath, 'w') as f:
                                 f.write(all_text) 
                                 f.close()
@@ -240,25 +246,30 @@ class PrettyParser:
         return wrapper
 
     
-    def run(self)->Optional[Union[str, List[str]]]:
+    def run(self) -> Optional[Union[str, List[str]]]:
         """
         Returns:
             list: list of cleaned up strings
         """
+
         if (self.mode == "pdf") or (self.mode == "txt"):
-            if not os.path.exists(self.files):
-                raise FileNotFoundError(f"{self.files} not found")
+
+            if self.files is not None:
+                total_files = self.files
+            elif self.directories is not None:
+                total_files = self.directories
+            else:
+                raise TypeError("either files or directories must be non empty (both are None)")
+
+            for x in total_files:
+                if not os.path.exists(x):
+                    raise FileNotFoundError(f"{self.files} not found") 
+           
             parser = self.parse_files(self.mode)
-            out = parser(self.directories, self.files, self.output)
+            out = parser(total_files)
             if not self.output:
                 return out
         else:
-            if self.directory is not None and self.files is not None:
-                raise TypeError("Only one of this arguments should be provided: directory, files")
-            if not isinstance(self.directory, (list, str)):
-                raise TypeError("directory must be a list or str")
-            if not isinstance(self.files, (list, str)):
-                raise TypeError("files must be a list or str")
             out = self.pretty_parser_list(self.files)
             return out
 

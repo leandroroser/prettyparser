@@ -228,7 +228,7 @@ class PrettyParser:
                             all_text = self.p10.sub(self.paragraphs_spacing, all_text)
                         if self.output:
                             try:
-                                fullpath =  re.sub(r"(.*)(/)$", "\\1", self.output) + "/" + re.sub(r"(^/)(.*)", "\\2", filename)
+                                fullpath =  re.sub(r"(.*)(/)$", "\\1", self.output) + "/" + re.sub(r"(^/)(.*)", "\\2", os.path.dirname(filename))
                                 os.makedirs(fullpath, exist_ok = self.overwrite)
                                 outpath = os.path.join(fullpath, re.sub(".pdf", ".txt", os.path.basename(filename)))
                             except FileExistsError:

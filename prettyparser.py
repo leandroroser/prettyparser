@@ -228,7 +228,10 @@ class PrettyParser:
                             all_text = self.p10.sub(self.paragraphs_spacing, all_text)
                         if self.output:
                             outpath = f'{self.output}/{re.sub(".pdf", ".txt", filename)}'
-                            Path(self.output).mkdir(parents=True, exist_ok=self.overwrite)
+                            try:
+                                Path(self.output).mkdir(parents=True, exist_ok=self.overwrite)
+                            except FileExistsError:
+                                raise
                             with open(outpath, 'w') as f:
                                 f.write(all_text) 
                                 f.close()

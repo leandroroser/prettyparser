@@ -183,11 +183,13 @@ class PrettyParser:
         Returns:
             list: list of cleaned up strings
         """
-        def wrapper(directory, output):
-            total_files = os.listdir(directory)
+        def wrapper(directory, file, output):
+
+            if file is not None:
+                total_files = [os.path.join(directory, file)]
+            else:
+                total_files = os.listdir(directory)
             number_files = len(total_files)
-            out = {}
-            time_elapsed = 0
 
             for i,filename in enumerate(total_files):
                 try:

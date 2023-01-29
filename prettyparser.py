@@ -229,13 +229,17 @@ class PrettyParser:
                         if self.output:
                             try:
                                 fullpath =  re.sub(r"(.*)(/)$", "\\1", self.output) + "/" + re.sub(r"(^/)(.*)", "\\2", os.path.dirname(filename))
-                                os.makedirs(fullpath, exist_ok = self.overwrite)
+                                os.makedirs(fullpath, exist_ok = False)
                                 outpath = os.path.join(fullpath, re.sub(".pdf", ".txt", os.path.basename(filename)))
                             except FileExistsError:
                                 raise
-                            with open(outpath, 'w') as f:
-                                f.write(all_text) 
-                                f.close()
+                            if not os.path.exists(outpath) or  (os.path.exists(outpath) and overwrite):
+                                with open(outpath, 'w') as f:
+                                    f.write(all_text) 
+                                    f.close()
+                            else:
+                                raise FileExistsError(f"File: [{outpath}] exists and overwrite is False")
+                                    
                             print(f"\033[92m * Written to: {outpath} \033[0m")
                         else:
                             out[filename] = all_text

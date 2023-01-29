@@ -11,13 +11,14 @@ import os
 from pathlib import Path
 from joblib import Parallel, delayed
 import multiprocessing
-import io
-from pdfminer.converter import TextConverter
-from pdfminer.pdfinterp import PDFPageInterpreter
-from pdfminer.pdfinterp import PDFResourceManager
-from pdfminer.pdfpage import PDFPage
-  
 
+from io import StringIO
+from pdfminer.converter import TextConverter
+from pdfminer.layout import LAParams
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfparser import PDFParser
 
 class PDFError(Exception):
     pass
@@ -166,31 +167,19 @@ class PrettyParser:
         all_text = ''
         i = 1
         try:
-            with open(fullpath, "rb") as f:
-                for pdf_page in PDFPage.get_pages(f, 
-                                    caching=True,
-                                    check_extractable=True):
-                    resource_manager = PDFResourceManager()
-                    fake_file_handle = io.StringIO()
-                    converter = TextConverter(resource_manager, 
-                                            fake_file_handle)
-                    
-                    page_interpreter = PDFPageInterpreter(resource_manager, converter)
-                    page_interpreter.process_page(pdf_page)
-                    converter.close()
-                    single_page_text = fake_file_handle.getvalue()
-                    fake_file_handle.close()
-                    if self.custom_pdf_fun:
-                        single_page_text = self.custom_pdf_fun(single_page_text)
-                        if not single_page_text:
-                            continue
-                        else:
-                            all_text += single_page_text
-                    else:
-                        if not single_page_text:
-                            continue
-                        all_text = all_text + (self.page_spacing if i!=1 else "") + single_page_text
-                    i += 1
+            output_string = StringIO()
+            with open(fullpath, 'rb') as in_file:
+                parser = PDFParser(in_file)
+                doc = PDFDocument(parser)
+                rsrcmgr = PDFResourceManager()
+                device = TextConverter(rsrcmgr, output_string, laparams=LAParams())
+                interpreter = PDFPageInterpreter(rsrcmgr, device)
+                for page in PDFPage.create_pages(doc):
+                    interpreter.process_page(page)
+            all_text = output_string.getvalue()
+            output_string.close()
+            if self.custom_pdf_fun:
+                all_text = self.custom_pdf_fun(all_text)
         except PDFError as e:
             print(e)
         return all_text

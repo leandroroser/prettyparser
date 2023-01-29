@@ -1,0 +1,552 @@
+8
+1
+0
+2
+
+t
+c
+O
+3
+2
+
+]
+
+R
+C
+.
+s
+c
+[
+
+2
+v
+0
+3
+1
+8
+0
+.
+0
+1
+8
+1
+:
+v
+i
+X
+r
+a
+
+Private Machine Learning in TensorFlow
+using Secure Computation
+
+Morten Dahl
+
+Jason Mancuso
+
+Yann Dupis
+
+Ben DeCoste
+
+Morgan Giraud
+
+Ian Livingstone
+
+Justin Patriquin
+
+Gavin Uhma
+
+Dropout Labs
+
+Abstract
+
+We present a framework for experimenting with secure multi-party computation
+directly in TensorFlow. By doing so we beneﬁt from several properties valuable
+to both researchers and practitioners, including tight integration with ordinary ma-
+chine learning processes, existing optimizations for distributed computation in
+TensorFlow, high-level abstractions for expressing complex algorithms and proto-
+cols, and an expanded set of familiar tooling. We give an open source implementa-
+tion of a state-of-the-art protocol and report on concrete benchmarks using typical
+models from private machine learning.
+
+1 Introduction
+
+Several ﬁelds come together in private machine learning: cryptography, machine learning, dis-
+tributed systems, and high-performance computing. As a result, researchers and practitioners de-
+veloping scalable solutions may ﬁnd themselves faced with a task requiring many diverse skill sets
+and expertise.
+
+Adapting machine learning models in a way that allows for privacy-preserving prediction and train-
+ing is complex and non-trivial on its own, and often requires deeper insight into cryptography or
+machine learning than experts from either ﬁeld have about the other. For instance, one may want to
+mix secure computation protocols with complementary properties and experiment with various cryp-
+tographic optimizations such as vectorization and other specializations. Simultaneously, one may
+want to ﬁnd variants of machine learning components that give sufﬁcient accuracy yet utilize the fact
+that some secure operations are signiﬁcantly faster than others. Thus, modularity and extensibility
+are crucial for effective experimentation.
+
+One may additionally be faced with a large implementation challenge, potentially having to stitch
+together several otherwise independent systems or re-implement complex methods from both ﬁelds.
+One must not only optimize local computations by taking advantage of diverse multi-core archi-
+tectures, but also the distributed processes inherent in secure computation, including how best to
+orchestrate the joint execution on multiple machines and minimize the overhead of sending large
+amounts of data across the network. Building all of this at the right level of abstraction can be
+overwhelming, and often comes at the cost of extensibility and code readability. This makes experi-
+mentation harder, potentially harming accessibility and correctness.
+
+Finally, for even small-scale solutions it is highly valuable to have access to tools for visual inspec-
+tion, debugging, and proﬁling such as TensorBoard in order to identify issues and bottlenecks in both
+the protocol and the machine learning model. Lack of such tools represents an additional barrier to
+entry.
+
+Preprint. Work in progress.
+
+ 
+ 
+ 
+ 
+ 
+ 
+In this paper we illustrate the beneﬁts of embedding protocols directly into TensorFlow in order to
+show that it can serve as a platform for easily experimenting with secure computation for private
+machine learning.
+
+1.1 Contributions
+
+We present tf-encrypted, an open source library built
+on top of TensorFlow with the aim of making private ma-
+chine learning more accessible to researchers and prac-
+titioners coming from either cryptography or machine
+learning, and without the need to be an expert in dis-
+tributed systems or high-performance computing. A
+small example is given in Figure 1, where a logistic re-
+gression model is used for making private predictions.
+Note that the methods processing input and output spec-
+ify on which party they should run, and that usual Ten-
+sorFlow operations may be used within to perform local
+plaintext operations.
+
+import tensorflow as tf
+import tf_encrypted as tfe
+
+@tfe . private_input ( ’ model - owner ’)
+def send_model_weig ht s () -> tf . Tensor :
+
+...
+
+@tfe . private_input ( ’ prediction - client ’)
+def send_input () -> tf . Tensor :
+
+...
+
+@tfe . private_output ( ’prediction - client ’)
+def receive_output ( y: tf . Tensor ):
+return tf . Print ([] , [ y ])
+
+w = send_model_weig ht s ()
+x = send_input ()
+y = tfe . sigmoid ( tfe . matmul (x , w ))
+op = receive_output (y )
+
+sess . run ( op )
+
+with tfe . Session () as sess :
+
+To this end we adapt and implement a state-of-the-art
+secure computation protocol for tensor oriented applica-
+tions (Section 2). We report on benchmarks using com-
+mon models from the literature (Section 3) and high-
+light additional properties of this approach that we ﬁnd
+of value: usability: by leveraging TensorFlow we ob-
+tain a familiar and comprehensive platform for building
+scalable solutions; integration: by reducing all secure
+computations to TensorFlow graphs, it becomes straight-forward to mix these with ordinary com-
+putations for hybrid approaches; extensibility: using TensorFlow’s high-level abstractions makes it
+easier to experiment with and develop new secure protocols on top of optimized primitives while
+maintaining code readability; performance: we reach high runtime efﬁciency without sacriﬁcing
+other properties via TensorFlow’s distributed execution engine heavily optimized for networking,
+parallel execution, and scalability; benchmarking: combining all of the above we obtain a common
+framework for comparable private machine learning.
+
+Figure 1: Example using tf-encrypted
+for private prediction, with the prediction
+input known only in plaintext by the client
+and the model weights only by the owner.
+
+1.2 Related Work
+
+Several freely available implementations of secure computation protocols exist, including those
+of Smart et al., Nordholt et al., Demmler et al., Zahur and Evans, yet all of these are standalone
+frameworks that do not provide integration with existing machine learning platforms, and arguably
+aim more at general purpose secure computation than our focus on private machine learning. As a re-
+sult, users are faced with a lower level interface and may have to implement basic machine learning
+components. We are furthermore not aware of any development tools for these frameworks outside
+of general purpose debuggers. To the best of our knowledge no machine learning support tools exist
+for these platforms.
+
+[2017],
+
+Juvekar et al.
+
+of Mohassel and Zhang
+
+The works
+[2018],
+Mohassel and Rindal [2018] focus on adapting secure computation protocols to private ma-
+chine learning, in some cases using similar optimizations as the protocol presented in Section 2.
+However, to the best of our knowledge none of these have openly available implementations and
+hence require a signiﬁcant investment from anyone wanting to apply them. To a large extent our
+aim is to provide a common platform based on TensorFlow for implementing and experimenting
+with protocols such as these. The concurrent work of Trask and OpenMined takes a somewhat
+similar approach yet currently focuses on PyTorch as opposed to TensorFlow.
+
+[2018], Wagh et al.
+
+Another line of work has focused on using differential privacy for privacy-preserving machine learn-
+ing Papernot et al. [2017, 2018], with reference implementations available in TensorFlow. These
+works remain orthogonal to our approach and do not employ any form of secure computation.
+
+2
+
+2 Secure Computations in TensorFlow
+
+TensorFlow as described by Abadi et al. [2016b] is among the leading frameworks for construct-
+ing and deploying machine learning models, offering an optimized engine for executing local and
+distributed computations as well as a high-level interface for expressing these. Importantly, the lat-
+ter abstracts away lower-level operations such as networking while remaining powerful enough to
+succinctly express computations with operations and tensors pinned to speciﬁed machines (see for
+example Figure 2). This combines for a powerful platform for giving efﬁcient implementations of
+distributed computations, including complex secure computations where it is crucial for privacy that
+some data remain known only on select machines.
+
+Moreover, the link between TensorFlow’s engine and high-level interface takes the form of stateful
+dataﬂow graphs, with nodes for performing tensor operations in the distributed setting. This means
+that the engine can not only take advantage of optimizations such as lazy evaluation and multi-
+core processing tailored for the speciﬁc runtime environment, but also optimize the graph itself and
+chose a node execution order based on both static and runtime information (see e.g. Abadi et al.
+[2016a]). For instance, we observe that large network transfers from Beaver triple generation are
+often automatically batched and moved to the beginning of the execution.
+
+As an example of a secure computation protocol implemented in TensorFlow, we here outline our
+variant of the well-known SPDZ protocol by Damgård et al. [2012] with two servers S0 and S1
+that is used for benchmarking in Section 3. The protocol is vectorized to improve performance
+of applications relying heavily on tensor operations and we use generalized triples produced by an
+independent third server1 to avoid sending redundant data when possible. Any number of input
+training data or prediction inputs. We
+providers and output receivers are supported, holding e.g.
+currently ensure passive (honest-but-curious) security under a single corruption and rely on two
+cryptographic primitives, namely additive secret sharing and secure channels between all players.
+
+Following typical practice we use a ﬁxed point encod-
+ing for the ﬂoating point numbers commonly used
+in machine learning, i.e. we scale by a ﬁxed fac-
+tor and treat the result as an integer. To repre-
+sent these we support both a ﬁxed int64 and a
+CRT-based int100 tensor type,
+the former offer-
+ing higher performance and the latter higher preci-
+sion. To maintain precision after multiplications we
+implement both the conservative truncation protocol
+of Catrina and Saxena [2010] requiring one round
+of communication, as well as the optimistic non-
+interactive protocol of Mohassel and Zhang [2017]
+that may fail with a small probability.
+
+def mul (x : MaskedTensor , y : MaskedTensor ):
+
+a , a0 , a1 , alpha0 , alpha1 = x . unwrapped
+b , b0 , b1 , beta0 , beta1 = y . unwrapped
+
+with tf . name_scope ( ’ mul ’ ):
+
+with tf . device ( crypto_producer ):
+
+ab = a * b
+ab0 , ab1 = share ( ab )
+
+with tf . device ( server_0 ):
+
+z0 = ab0 + ( a0 * beta0 ) \
+
++ ( alpha0 * b0 ) \
++ ( alpha0 * beta )
+
+with tf . device ( server_1 ):
+
+z1 = ab1 + ( a1 * beta1 ) \
++ ( alpha1 * b1 )
+
+return PrivateTensor ( z0 , z1 )
+
+As in other SPDZ variants, private tensors hxi are se-
+cret shared into two tensors x0 and x1, held by server
+S0 and S1 respectively, such that x = x0 + x1 yet
+either share on its own reveals nothing about x. How-
+ever, unlike other variants, we also rely on a masked
+tensor hhxii which in addition to x0 and x1 also in-
+cludes a random tensor a held by S2, shares a0 and a1 of it held by S0 and S1, and an α held by both
+S0 and S1 such that α = x − a. While this is simply an explicit representation of the intermediate
+state of a SPDZ multiplication, having it in this form allows us to easily extend and generalize triples
+in order to reduce computation and networking. Converting a tensor from private to masked takes
+one round of ofﬂine communication where a is sampled by S2 and shares a0 and a1 of it are sent to
+S0 and S1, and one round of online communication where xi −ai is sent by Si to S1−i for i ∈ {0, 1}
+and (x0 − a0) + (x1 − a1) = α is computed by both.
+
+Figure 2: Secure multiplication implemented
+in TensorFlow: tf.device pin data and op-
+erations to speciﬁc machines to multiply two
+masked tensors, and takes care of implicitly
+adding nodes for transmitting ab0 and ab1.
+
+Secure computation on tensors proceed as in other SPDZ variants, albeit with some operations ﬁrst
+converting private tensors into masked tensors. For instance, multiplication is only implemented for
+
+1This server is essentially the crypto producer as used in e.g. Mohassel and Zhang [2017] that can run
+entirely ofﬂine as long as the function to compute is known, which can be fully determined at compile time due
+to TensorFlow’s use of static dataﬂow graphs.
+
+3
+
+masked tensors as hzi = mul(hhxii, hhyii) with zi = iαxαy + αxay
+i and where axay
+is computed and shared by S2 (see Figure 2). Note that the result of a multiplication is a private
+tensor, meaning z will have to be masked before it can be used as input to another multiplication;
+however, both hhxii and hhyii can readily be used again as is, meaning every tensor only needs to be
+masked once. While special triples for squaring are no longer needed with explicit masking, we can
+still optimize e.g. matrix multiplications and convolutions via specialized triples and avoid reducing
+everything to (scalar) multiplications, in turn reducing networking further. Finally, operations such
+as transposing and stacking are done locally without interaction by letting all three servers operate
+on the values associated with private and masked tensors.
+
+i αy + axay
+
+i + ax
+
+3 Experiments
+
+We benchmark the protocol of Section 2 for private inference on the typical MNIST handwritten
+digit classiﬁcation task. Using TensorFlow we train each of the neural networks2 in Figure 3 on the
+plaintext training set and then run private inferences on the remaining test set, keeping both predic-
+tion input and model weights private. We perform all experiments on the Google Cloud Platform
+using instances in the same region (us-east1) and with 36 vCPUs/60 GB memory each. We note
+that TensorBoard was invaluable in this process for picking the right approximation intervals for acti-
+vation functions and inspecting overall correctness, and that performing all operations in TensorFlow
+simpliﬁed the process of model handling signiﬁcantly.
+
+Network A
+
+FC (784, 128)
+BatchNorm
+ReLU (approx)
+FC (128, 128)
+BatchNorm
+ReLU (approx)
+FC (128, 10)
+
+Network B
+Conv (5, 16, 1, 1)
+BatchNorm
+ReLU (approx)
+AvgPool (2)
+Conv (5, 16, 1, 1)
+BatchNorm
+ReLU (approx)
+AvgPool (2)
+FC (256, 100)
+BatchNorm
+ReLU (approx)
+FC (100, 10)
+
+Network C
+Conv (5, 20, 1, 1)
+BatchNorm
+ReLU (approx)
+AvgPool (2)
+Conv (5, 50, 1, 1)
+BatchNorm
+ReLU (approx)
+AvgPool (2)
+FC (800, 500)
+BatchNorm
+ReLU (approx)
+FC (500, 10)
+
+Figure 3: Neural network architectures. The convolutional
+layers are denoted by (ﬁeld size, channels, stride, padding)
+and average pooling layers by window size
+
+The left part of Table 1 summarizes
+the combined ofﬂine and online run-
+time averaged over 100 inferences. As
+seen we get reasonable performance that
+may already be adequate for concrete
+applications.
+that int100
+The fact
+also achieves good performance sug-
+gests that we are not limited by the
+lower precision of int64 when look-
+ing at larger models. Additional exper-
+iments furthermore indicate sub-linearly
+to typical batch
+scaling with respect
+sizes, leading to an interesting trade-off
+between latency and through-put; for in-
+stance, Network C with batch sizes 1, 10,
+and 100 take respectively 124, 182, and
+541ms.
+
+We also compare our accuracy over the entire testing set against plaintext TensorFlow. As seen in
+the right part of Table 1 we obtain almost identical accuracy using both int64 and int100, with
+indications that the latter may give a slightly better output distribution according to the mean KL
+divergence, in turn potentially justifying its higher runtime cost. We note that these models achieve
+good performance despite using approximations, further underlining the importance of being able
+to adapt models to the encrypted setting.
+
+Based on the above we conjecture that our approach scales to larger models, and is at least within
+an order of magnitude of related work in terms of runtime performance (at what we believe to be
+a lower implementation cost). We defer proper exploration of both topics to the full version of this
+paper.
+
+4 Conclusion
+
+We have proposed an open source framework for experimenting with secure computation in Ten-
+sorFlow, and illustrated how implementation of such protocols can be easily expressed using high
+
+2These are variants of models studied in Mohassel and Zhang [2017], Juvekar et al. [2018], Wagh et al.
+[2018]. We use polynomials interpolated to ﬁt ReLU on the interval [−3, 3] for activation functions and perform
+the ﬁnal argmax and softmax on logits in plaintext to avoid computing these securely.
+
+4
+
+Runtime average
+int100
+int64
+138ms
+14ms
+189ms
+126ms
+211ms
+124ms
+
+Runtime deviation
+int100
+int64
+61ms
+3.8ms
+94ms
+115ms
+60ms
+93ms
+
+A
+B
+C
+
+Accuracy
+int64
+
+TF
+
+int100
+
+int64
+97.35% 97.18% 97.26% 0.0065
+99.26% 99.00% 98.93% 0.2086
+99.44% 99.41% 98.54% 0.2311
+
+int100
+0.0064
+0.0311
+0.1045
+
+KL divergence
+
+Table 1: Runtime benchmarks with int64 and int100.
+
+level abstractions (Figure 2). This additionally allows private machine learning to be expressed in
+an interface similar to ordinary TensorFlow (Figure 1) while maintaining good performance.
+
+In the full version of this paper we elaborate on these results, and present a modular extension of
+the concrete protocol presented here that adds features from Wagh et al. [2018] in order to compute
+exact ReLU and MaxPooling.
+
+References
+
+Martín Abadi, Ashish Agarwal, Paul Barham, Eugene Brevdo, Zhifeng Chen, Craig Citro, Gre-
+gory S. Corrado, Andy Davis, Jeffrey Dean, Matthieu Devin, Sanjay Ghemawat, Ian J. Good-
+fellow, Andrew Harp, Geoffrey Irving, Michael Isard, Yangqing Jia, Rafal Józefowicz, Lukasz
+Kaiser, Manjunath Kudlur, Josh Levenberg, Dan Mané, Rajat Monga, Sherry Moore, Derek Gor-
+don Murray, Chris Olah, Mike Schuster, Jonathon Shlens, Benoit Steiner, Ilya Sutskever, Kunal
+Talwar, Paul A. Tucker, Vincent Vanhoucke, Vijay Vasudevan, Fernanda B. Viégas, Oriol Vinyals,
+Pete Warden, Martin Wattenberg, Martin Wicke, Yuan Yu, and Xiaoqiang Zheng. TensorFlow:
+Large-Scale Machine Learning on Heterogeneous Distributed Systems. CoRR, abs/1603.04467,
+2016a. URL http://arxiv.org/abs/1603.04467.
+
+Martín Abadi, Paul Barham, Jianmin Chen, Zhifeng Chen, Andy Davis, Jeffrey Dean, Matthieu
+Devin, Sanjay Ghemawat, Geoffrey Irving, Michael Isard, Manjunath Kudlur, Josh Levenberg,
+Rajat Monga, Sherry Moore, Derek G. Murray, Benoit Steiner, Paul Tucker, Vijay Vasudevan,
+Pete Warden, Martin Wicke, Yuan Yu, and Xiaoqiang Zheng. TensorFlow: A System for Large-
+scale Machine Learning. In Proceedings of the 12th USENIX Conference on Operating Systems
+Design and Implementation (OSDI), 2016b.
+
+Octavian Catrina and Amitabh Saxena. Secure computation with ﬁxed-point numbers. In Financial
+
+Cryptography and Data Security. Springer Berlin Heidelberg, 2010.
+
+Ivan Damgård, Valerio Pastro, Nigel P. Smart, and Sarah Zakarias. Multiparty Computation from
+Somewhat Homomorphic Encryption. In Advances in Cryptology - CRYPTO 2012 - 32nd Annual
+Cryptology Conference, Santa Barbara, CA, USA, 2012.
+
+Daniel Demmler, Thomas Schneider, and Michael Zohner. ABY - A Framework for Efﬁcient Mixed-
+
+Protocol Secure Two-Party Computation.
+
+Chiraag Juvekar, Vinod Vaikuntanathan, and Anantha Chandrakasan. Gazelle: A Low Latency
+
+Framework for Secure Neural Network Inference. 2018.
+
+Payman Mohassel and Peter Rindal. ABY3: A Mixed Protocol Framework for Machine Learning.
+
+2018.
+
+Payman Mohassel and Yupeng Zhang. SecureML: A System for Scalable Privacy-Preserving Ma-
+
+chine Learning. In 2017 IEEE Symposium on Security and Privacy (SP), 2017.
+
+Peter Sebastian Nordholt, Kasper Damgård, Peter F. Frandsen, and Jonas Lindstrøm. FRESCO:
+Framework for Efﬁcient and Secure Computation. https://github.com/aicis/fresco.
+
+Nicolas Papernot, Martín Abadi, Ulfar Erlingsson, Ian Goodfellow, and Kunal Talwar. Semi-
+arXiv preprint
+
+supervised knowledge transfer for deep learning from private training data.
+arXiv:1610.05755, 2017.
+
+Nicolas Papernot, Shuang Song, Ilya Mironov, Ananth Raghunathan, Kunal Talwar, and Ulfar Er-
+
+lingsson. Scalable Private Learning with PATE. arXiv preprint arXiv:1802.08908, 2018.
+
+5
+
+Nigel P. Smart, Marcel Keller, Dragos Rotaru, and Peter Scholl.
+
+SCALE-MAMBA.
+
+https://homes.esat.kuleuven.be/~nsmart/SCALE/.
+
+Andrew Trask and OpenMined. PySyft: A library for encrypted, privacy preserving deep learning.
+
+https://github.com/OpenMined/PySyft.
+
+Sameer Wagh, Divya Gupta, and Nishanth Chandran. SecureNN: Efﬁcient and Private Neural Net-
+
+work Training. IACR ePrint Archive, Report 2018/442, 2018.
+
+Samee Zahur and David Evans. Obliv-C: A Language for Extensible Data-Oblivious Computation.
+
+https://oblivc.org/.
+
+6
+
+

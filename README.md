@@ -22,6 +22,28 @@ or
 $ pip install prettyparser
 ```
 
+
+## Example: processing a series PDF files
+
+
+```Python
+import regex as re
+from prettyparser import PrettyParser
+
+files = ["./BOOKS/PDF/PDF1.pdf", "./BOOKS/PDF/PDF2.pdf"]
+output = "./BOOKS/TXT"
+parser = PrettyParser(files, None, output, mode = 'pdf',
+                      args = [[r"(\n\s*\d+\s*\n)|(\n\s*\d+\s*$)", r'\n\n'],
+                            [r"\n\s*-\d-\s*\n", r'\n\n'], 
+                            [r"\n\s*(\* *)+\s*\n", r'\n\n'],
+                            [r"__some_header_text", r'\n\n', re.IGNORECASE]],
+                            remove_whitelines = True,
+                            paragraphs_spacing = 1,
+                            remove_hyphen_eol = True)
+parser.run()
+```
+
+
 ## Example: processing a folder with multiple PDF files
 
 
@@ -31,7 +53,7 @@ from prettyparser import PrettyParser
 
 directory = "./BOOKS/PDF"
 output = "./BOOKS/TXT"
-parser = PrettyParser(directory, output, mode = 'pdf',
+parser = PrettyParser(None, directory, output, mode = 'pdf',
                       args = [[r"(\n\s*\d+\s*\n)|(\n\s*\d+\s*$)", r'\n\n'],
                             [r"\n\s*-\d-\s*\n", r'\n\n'], 
                             [r"\n\s*(\* *)+\s*\n", r'\n\n'],
@@ -49,7 +71,7 @@ A quicker way for testing additional corrections can be implemented by using the
 ```Python
 directory = "./BOOKS/TXT"
 output = "./BOOKS/TXT_REPARSED"
-parser = PrettyParser(directory, output,  mode = 'txt', 
+parser = PrettyParser(None, directory, output,  mode = 'txt', 
                         args=[[r"some other header.*\d+", r''],
                             [r"^\d+.*", r'', re.MULTILINE], 
                             [r"([A-Z]+)( *\n)([A-Z]+)", r'\1\3'],
@@ -115,11 +137,19 @@ Remove empty lines and finally separate each line with a blank line.
 Below is the page number->.
 ```
 
+## Runnning from the command line
+
+"""
+ prettyparser --directories /home/BOOKS --output /home/BOOKS_PARSED --mode 'pdf'
+```
+
+
+
 Arguments
 ---------
 - **files (list or str)**: Path to parse for pdf/txt operations. If a string is passed, it will be treated as a directory when mode is 'pdf' or 'txt'. If a str or list is passed when mode is 'pyobj', it will be treated as a str/list of text files already loaded in memory in the corresponding object
 - **output (str)**: output directory
-- **args (list)**: list of tuples of the form (regex, replacement, flags). The flag can be absent.
+- **args (list)**: list of tuples of the form (regex, replacement, flags). The flag can be absent
 - **mode (str)**: 'pdf', 'txt' or 'pyobj' (the latter for Python lists and strings)
 - **default (bool)**: if True, perform several default cleanup operations (default)
 - **remove_whitelines (bool)**: if True, remove whitespaces
@@ -127,6 +157,8 @@ Arguments
 - **page_spacing (str)**: string to insert between pages
 - **remove_hyphen_eol (bool)**: if True, remove end of line hyphens and merge subwords
 - **custom_pdf_fun (Callable)**: custom function to parse pdf files
+- **overwrite(bool)**: Overwrite file if exists. Default False
+- **n_jobs(int)**: Number of jobs. Default: number of cores -1
   It must accept a pdfplumber page as argument and return a text to be joined with previous pages
 
 Current language support for the default parser
@@ -135,6 +167,6 @@ English, Spanish, German, French, Portuguese
 
 License
 -------
-© Leandro Roser, 2021. Licensed under an [Apache-2](https://github.com/leandroroser/prettyparser/blob/main/LICENSE.txt) license.
+© Leandro Roser, 2023. Licensed under an [Apache-2](https://github.com/leandroroser/prettyparser/blob/main/LICENSE.txt) license.
 
 

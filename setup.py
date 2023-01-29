@@ -17,7 +17,7 @@ with open(os.path.join(lib, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='prettyparser',
-      version='1.0.15',
+      version='2.0.0',
       description= description,
       author='Leandro Roser',
       author_email='learoser@gmail.com',
@@ -27,5 +27,8 @@ setup(name='prettyparser',
       python_requires='>=3.6',
       long_description=long_description,
       long_description_content_type = 'text/x-rst',
-      py_modules=['prettyparser']
+      py_modules=['prettyparser'],
+      entry_points= {
+        'console_scripts': ['prettyparser=main:main']
+      }
      )

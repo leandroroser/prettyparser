@@ -10,13 +10,20 @@ from typing import (Union,
                     List)
 import os
 from pathlib import Path
+from joblib import Parallel, delayed
+import multiprocessing
+
+
+class PDFError(Exception):
+    pass
+
 
 class PrettyParser:
     """Parse pdf/txt files or python strings/lists and perfom cleanup operations to enhance the text quality
 
     Args:
-        Directories (list, str or None): Paths with folders to parse for pdf/txt operations
-        files (list, str or None): Path with files to parse for pdf/txt operations
+        files (list, str or None): Path with files to parse for pdf/txt operations or list with text
+        directories (list, str or None): Paths with folders to parse for pdf/txt operations
         If a string is passed, it will be treated as a directory when mode is 'pdf' or 'txt'
         If a str or list is passed when mode is 'pyobj', 
         it will be treated as a str/list of text files already loaded in memory in the corresponding object
@@ -31,21 +38,23 @@ class PrettyParser:
         custom_pdf_fun (Callable): custom function to parse pdf files
         It must accept a pdfplumber page as argument and return a text to be joined with previous pages
         overwrite (bool): overwrite file if exists. Deafault: False.
+        n_jobs: number of jobs. Default: number of cores -1
 
     Returns:
         list or str: list of parsed files or string when output = None
     """
-    def __init__(self, directories:str|List[str]|None = None, files:str|List[str]|None = None, 
-                 output:str|None = None, args:list|None = None, mode:str = "path", 
+    def __init__(self, files:str|List[str]|None = None, directories:str|List[str]|None = None, 
+                 output:str|None = None, args:list|None = None, mode:str = "pdf", 
                  default:bool = True, remove_whitelines:bool = False, paragraphs_spacing:int = 0,
                  page_spacing:str = "\n\n", remove_hyphen_eol:bool = False, custom_pdf_fun: Callable|None = None,
-                 overwrite:bool = False):
+                 overwrite:bool = False,
+                 n_jobs:Callable = multiprocessing.cpu_count() - 1):
 
         if directories is not None and files is not None:
             raise TypeError("Only one of this arguments should be provided: directory, files")
+        
 
-        self.files = files
-        self.directories = directories
+        self.n_jobs = n_jobs
         
         if files is not None:
             if isinstance(files, str):
@@ -61,7 +70,14 @@ class PrettyParser:
             if isinstance(directories, str):
                 directories = [os.path.abspath(directories)]
             self.directories = [os.path.join(top, thisfile) for thisdir in directories for top,dirs,thisfiles in os.walk(thisdir) for thisfile in thisfiles]
-            
+        
+        if files is not None:
+            self.total_files = self.files
+        elif directories is not None:
+            self.total_files = self.directories
+        else:
+            raise TypeError("either files or directories must be non empty (both are None)")
+
         self.output = output
 
         if args:
@@ -129,7 +145,7 @@ class PrettyParser:
         return x
 
 
-    def pretty_parser_pdf(self, fullpath:str, i:int) -> str:
+    def pretty_parser_pdf(self, fullpath:str) -> str:
         """
         Args:
             directory (str): directory of the pdf file
@@ -140,19 +156,24 @@ class PrettyParser:
         """
         print("Parsing... " + fullpath)
         all_text = ''
-        with pdfplumber.open(fullpath) as pdf:
-            for pdf_page in tqdm(pdf.pages, total = len(pdf.pages)):
-                if self.custom_pdf_fun:
-                    single_page_text = self.custom_pdf_fun(pdf_page)
-                    if not single_page_text:
-                        continue
+        i = 1
+        try:
+            with pdfplumber.open(fullpath) as pdf:
+                for pdf_page in pdf.pages:
+                    if self.custom_pdf_fun:
+                        single_page_text = self.custom_pdf_fun(pdf_page)
+                        if not single_page_text:
+                            continue
+                        else:
+                            all_text += single_page_text
                     else:
-                        all_text += single_page_text
-                else:
-                    single_page_text = pdf_page.extract_text()
-                    if not single_page_text:
-                        continue
-                    all_text = all_text + (self.page_spacing if i!=1 else "") + single_page_text
+                        single_page_text = pdf_page.extract_text()
+                        if not single_page_text:
+                            continue
+                        all_text = all_text + (self.page_spacing if i!=1 else "") + single_page_text
+                    i += 1
+        except PDFError as e:
+            print(e)
         return all_text
     
 
@@ -169,6 +190,7 @@ class PrettyParser:
         with  open(fullpath, 'r') as f:
             all_text = f.read()
         return all_text
+
 
     def pretty_parser_list(self, textlist:list) -> str|List[str]:
         """
@@ -198,88 +220,67 @@ class PrettyParser:
                 print(f"\033[91m + Error: {e} \033[0m")
         return out
 
-    
-    def parse_files(self, datatype:str) -> Callable[[str, str], Optional[List[str]]]:
-        """
-        Args:
-            datatype (str): type of the data to parse
-        Returns:
-            list: list of cleaned up strings
-        """
 
-        def wrapper(total_files:list):
-            out = {}
-            number_files = len(total_files)
-            time_elapsed = 0
-            
-            for i,filename in enumerate(total_files):
+    def save_to_file(self, data, filename):
+        try:
+            fullpath =  re.sub(r"(.*)(/)$", "\\1", self.output) + "/" + re.sub(r"(^/)(.*)", "\\2", os.path.dirname(filename))
+            if not os.path.exists(fullpath):
+                os.makedirs(fullpath)
+            outpath = os.path.join(fullpath, re.sub(".pdf", ".txt", os.path.basename(filename)))
+            if not os.path.exists(outpath) or  (os.path.exists(outpath) and self.overwrite):
                 try:
-                    if filename.endswith(datatype):
-                        start = time.time()
-                        if datatype == 'pdf':
-                            all_text = self.pretty_parser_pdf(filename, i)
-                        elif datatype == 'txt':
-                            all_text = self.pretty_parser_txt(filename)
-                        else:
-                            raise TypeError("datatype must be 'pdf' or 'txt'")
+                    with open(outpath, 'w') as f:
+                        f.write(data) 
+                        f.close()
+                except FileExistsError:
+                    raise FileExistsError(f"File: [{outpath}] exists and overwrite is False")
+        except:
+            raise
 
-                        all_text = self.cleanup(all_text)
-                        all_text = self.p9.sub("" , all_text)
-                        if self.paragraphs_spacing:
-                            all_text = self.p10.sub(self.paragraphs_spacing, all_text)
-                        if self.output:
-                            try:
-                                fullpath =  re.sub(r"(.*)(/)$", "\\1", self.output) + "/" + re.sub(r"(^/)(.*)", "\\2", os.path.dirname(filename))
-                                if not os.path.exists(fullpath):
-                                    os.makedirs(fullpath)
-                                outpath = os.path.join(fullpath, re.sub(".pdf", ".txt", os.path.basename(filename)))
-                            except FileExistsError:
-                                raise
-                            if not os.path.exists(outpath) or  (os.path.exists(outpath) and overwrite):
-                                with open(outpath, 'w') as f:
-                                    f.write(all_text) 
-                                    f.close()
-                            else:
-                                raise FileExistsError(f"File: [{outpath}] exists and overwrite is False")
-                                    
-                            print(f"\033[92m * Written to: {outpath} \033[0m")
-                        else:
-                            out[filename] = all_text
-                        end = time.time()
-                        time_elapsed += (end - start)
-                        print(f"\033[92m * Time average: {time_elapsed/(i+1):.2f} seconds/book \033[0m")
-                        print(f"\033[92m * Time elapsed: {time_elapsed/60:.2f} minutes \033[0m")
-                        print(f"\033[92m * Processed files: { 100 *(i+1)/(number_files):.1f} % \033[0m")
-                except Exception as e:
-                    print(f"\033[91m + Error: {e} \033[0m")
-                if not self.output:
-                    return out
-        return wrapper
 
-    
+    def parse_single_file(self, filename:str, datatype:str):
+
+        all_text = ""
+        if filename.endswith(datatype):
+            if datatype == 'pdf':
+                all_text = self.pretty_parser_pdf(filename)
+            elif datatype == 'txt':
+                all_text = self.pretty_parser_txt(filename)
+            else:
+                raise TypeError("datatype must be 'pdf' or 'txt'")
+        all_text = self.cleanup(all_text)
+        all_text = self.p9.sub("" , all_text)
+        if self.paragraphs_spacing:
+            all_text = self.p10.sub(self.paragraphs_spacing, all_text)
+        if self.output is not None:
+            self.save_to_file(all_text, filename)
+            return None
+        return all_text
+
+
+    def parse_files(self, total_files: list, datatype:str) -> Callable[[str, str], Optional[List[str]]]:
+        par = Parallel(n_jobs=self.n_jobs)(delayed(self.parse_single_file)(i, datatype) for i in tqdm(total_files))
+        if not self.output:
+            out = dict(zip(total_files, par))
+            return out
+        return None
+
+            
     def run(self) -> Optional[Union[str, List[str]]]:
         """
         Returns:
             list: list of cleaned up strings
         """
+        
+        if len(self.total_files)  < self.n_jobs:
+            n_jobs = self.total_files
 
+        print(f"Using {self.n_jobs} cores")
         if (self.mode == "pdf") or (self.mode == "txt"):
-
-            if self.files is not None:
-                total_files = self.files
-            elif self.directories is not None:
-                total_files = self.directories
-            else:
-                raise TypeError("either files or directories must be non empty (both are None)")
-
-            for x in total_files:
+            for x in self.total_files:
                 if not os.path.exists(x):
                     raise FileNotFoundError(f"{self.files} not found") 
-           
-            parser = self.parse_files(self.mode)
-            out = parser(total_files)
-            if not self.output:
-                return out
+            out = self.parse_files(self.total_files, self.mode)
         else:
-            out = self.pretty_parser_list(self.files)
+            out = self.pretty_parser_list(self.total_files)
             return out

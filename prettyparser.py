@@ -98,7 +98,7 @@ class PrettyParser:
         self.p11 = re.compile(fr"(-)(?:[ \t]*?[\d]*?\n+[ \t]*?)([{lower}{upper}])")
         #self.p7 = re.compile(r"([.,;])(\w)", flags= re.UNICODE)
         #self.pend = re.compile(r"( *\n *)+")
-        self.overwrite = self.overwrite
+        self.overwrite = overwrite
     
     def cleanup(self, x:str) -> str:
         """

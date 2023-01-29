@@ -22,7 +22,7 @@ import multiprocessing
 @click.option('--custom_pdf_fun', type=click.STRING, default=None, help='Custom lambda function to parse pdf files. Parse the function as a string.'
                                                                              'It must accept a pdfplumber page as argument and return a text to be joined with previous pages.')
 @click.option('--overwrite', type=click.BOOL, default=False, help='Overwrite file if exists. Default: False.')
-@click.option('--n_jobs', type=click.INT, default= multiprocessing.cpu_count() - 1, help='Number of jobs. Default: number of cores -1.')
+@click.option('--n_jobs', type=click.INT, default= multiprocessing.cpu_count() - 2, help='Number of jobs. Default: number of cores -2.')
 def main(files, directories, output, args, mode, default, remove_whitelines, paragraphs_spacing, page_spacing, remove_hyphen_eol, custom_pdf_fun, overwrite, n_jobs):
     if custom_pdf_fun is not None:
         custom_pdf_fun = eval(custom_pdf_fun)
@@ -39,7 +39,7 @@ def main(files, directories, output, args, mode, default, remove_whitelines, par
                 page_spacing =page_spacing, remove_hyphen_eol = remove_hyphen_eol, 
                 custom_pdf_fun = custom_pdf_fun,
                 overwrite = overwrite,
-                n_jobs = multiprocessing.cpu_count() - 1)
+                n_jobs = n_jobs)
     parser.run()
 
 

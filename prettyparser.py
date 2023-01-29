@@ -38,7 +38,7 @@ class PrettyParser:
         custom_pdf_fun (Callable): custom function to parse pdf files
         It must accept a pdfplumber page as argument and return a text to be joined with previous pages
         overwrite (bool): overwrite file if exists. Deafault: False.
-        n_jobs: number of jobs. Default: number of cores -1
+        n_jobs: number of jobs. Default: number of cores -2
 
     Returns:
         list or str: list of parsed files or string when output = None
@@ -48,7 +48,7 @@ class PrettyParser:
                  default:bool = True, remove_whitelines:bool = False, paragraphs_spacing:int = 0,
                  page_spacing:str = "\n\n", remove_hyphen_eol:bool = False, custom_pdf_fun: Callable|None = None,
                  overwrite:bool = False,
-                 n_jobs:Callable = multiprocessing.cpu_count() - 1):
+                 n_jobs:Callable = multiprocessing.cpu_count() - 2):
 
         if directories is not None and files is not None:
             raise TypeError("Only one of this arguments should be provided: directory, files")

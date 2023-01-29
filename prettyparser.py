@@ -109,7 +109,7 @@ class PrettyParser:
         return x
 
 
-    def pretty_parser_pdf(self, directory:str, filename:str, i:int)->str:
+    def pretty_parser_pdf(self, fullpath:str, i:int)->str:
         """
         Args:
             directory (str): directory of the pdf file
@@ -118,7 +118,6 @@ class PrettyParser:
         Returns:
             str: cleaned up string
         """
-        fullpath = os.path.join(directory, filename)
         print("Parsing... " + fullpath)
         all_text = ''
         with pdfplumber.open(fullpath) as pdf:
@@ -137,7 +136,7 @@ class PrettyParser:
         return all_text
     
 
-    def pretty_parser_txt(self, directory:str, filename:str)->str:
+    def pretty_parser_txt(self, fullpath:str)->str:
         """
         Args:
             directory (str): directory of the txt file
@@ -151,7 +150,7 @@ class PrettyParser:
             all_text = f.read()
         return all_text
 
-    def pretty_parser_list(self, textlist:list)->Union[str, List[str]]:
+    def pretty_parser_list(self, textlist:list)->str|List[str]:
         """
         Args:
             textlist (list): list of strings
@@ -190,12 +189,12 @@ class PrettyParser:
         def wrapper(directory:str|None, file:str|None, output: str|None):
 
             if file is not None and isinstance(file, "str"):
-                total_files = [file]
-            elif isinstance(file, list):
                 total_files = [os.path.join(os.path.abspath(file), file)]
+            elif isinstance(file, list):
+                total_files = [os.path.join(os.path.abspath(x), x) for x in file]
             
             if directory is not None and isinstance(directory, "str"):
-                total_files = [directory]
+                total_files = [os.path.abspath(directory)]
             else:
                 total_files = [os.path.join(top, file) for thisdir in directory for top, dirs, files in os.walk(thisdir)]
             
@@ -206,9 +205,9 @@ class PrettyParser:
                     if filename.endswith(datatype):
                         start = time.time()
                         if datatype == 'pdf':
-                            all_text = self.pretty_parser_pdf(directory, filename, i)
+                            all_text = self.pretty_parser_pdf(filename, i)
                         elif datatype == 'txt':
-                            all_text = self.pretty_parser_txt(directory, filename)
+                            all_text = self.pretty_parser_txt(filename)
                         else:
                             raise TypeError("datatype must be 'pdf' or 'txt'")
 

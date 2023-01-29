@@ -20,9 +20,6 @@ from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 from pdfminer.pdfparser import PDFParser
 
-class PDFError(Exception):
-    pass
-
 
 class PrettyParser:
     """Parse pdf/txt files or python strings/lists and perfom cleanup operations to enhance the text quality
@@ -166,9 +163,9 @@ class PrettyParser:
         print("Parsing... " + fullpath)
         all_text = ''
         i = 1
-        try:
-            output_string = StringIO()
-            with open(fullpath, 'rb') as in_file:
+        output_string = StringIO()
+        with open(fullpath, 'rb') as in_file:
+            try:
                 parser = PDFParser(in_file)
                 doc = PDFDocument(parser)
                 rsrcmgr = PDFResourceManager()
@@ -176,12 +173,14 @@ class PrettyParser:
                 interpreter = PDFPageInterpreter(rsrcmgr, device)
                 for page in PDFPage.create_pages(doc):
                     interpreter.process_page(page)
-            all_text = output_string.getvalue()
-            output_string.close()
-            if self.custom_pdf_fun:
-                all_text = self.custom_pdf_fun(all_text)
-        except PDFError as e:
-            print(e)
+                all_text = output_string.getvalue()
+                output_string.close()
+                if self.custom_pdf_fun:
+                    all_text = self.custom_pdf_fun(all_text)
+            except pdfminer.pdfparser.PDFSyntaxError:
+                print(e)
+            except Exception as e:
+                print(e)
         return all_text
         
 
@@ -247,7 +246,8 @@ class PrettyParser:
 
 
     def parse_single_file(self, filename:str, datatype:str):
-
+        if os.path.exists(filename) and not self.overwrite:
+            return None
         all_text = ""
         if filename.endswith(datatype):
             if datatype == 'pdf':
